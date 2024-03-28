@@ -44,6 +44,18 @@ outputs:
   admin_password:
     description: WordPress admin password
     value: ${{ steps.install.outputs.admin_password }}
+  db_name:
+    description: WordPress database name
+    value: wordpress
+  db_user:
+    description: WordPress database user
+    value: root
+  db_pass:
+    description: WordPress database password
+    value: root
+  db_host:
+    description: WordPress database host
+    value: localhost
 runs:
   using: composite
   steps:
