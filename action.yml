@@ -1,0 +1,118 @@
+name: install-wordpress
+description: Install WordPress locally using GitHub
+inputs:
+  wordpress_version:
+    description: WordPress version
+    required: false
+    default: latest
+  #mysql-version:
+  #  description: 'MySQL version'
+  #  required: false
+  #  default: '5.7'
+  php_version:
+    description: PHP version
+    required: false
+    default: '8.2'
+  php_extensions:
+    description: List of PHP extensions to install
+    required: false
+    default: imagick
+  installation_path:
+    description: WordPress Installation path
+    required: false
+    default: ${{ runner.temp }}/wordpress
+  github_token:
+    description: GitHub token
+    required: true
+    default: ${{ github.token }}
+outputs:
+  version:
+    description: WordPress version
+    value: ${{ steps.metadata.outputs.version }}
+  path:
+    description: Path to WordPress installation
+    value: ${{ inputs.installation_path }}
+  plugins_path:
+    description: Path to WordPress plugins
+    value: ${{ steps.metadata.outputs.plugins_path }}
+  themes_path:
+    description: Path to WordPress themes
+    value: ${{ steps.metadata.outputs.themes_path }}
+  admin_username:
+    description: WordPress admin username
+    value: ${{ steps.install.outputs.admin_username }}
+  admin_password:
+    description: WordPress admin password
+    value: ${{ steps.install.outputs.admin_password }}
+runs:
+  using: composite
+  steps:
+    - name: Start MySQL
+      shell: bash
+      run: sudo /etc/init.d/mysql start
+
+    - name: Create the Database
+      shell: bash
+      run: mysql -e 'CREATE DATABASE wordpress;' -uroot -proot
+
+    - name: Setup PHP with PECL extension
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ inputs.php_version }}
+        extensions: ${{ inputs.php_extensions }}
+
+    - name: Setup WP-CLI
+      id: wp_cli
+      shell: bash
+      run: >- # https://make.wordpress.org/cli/handbook/guides/installing/#installing-via-composer
+        composer global require wp-cli/wp-cli-bundle \
+          --prefer-dist \
+          --no-progress \
+          --no-suggest \
+          --no-interaction
+
+    - name: Download WordPress
+      shell: bash
+      run: |-
+        wp core download --path=${{ inputs.installation_path }} --force
+
+    - name: Configure WordPress
+      shell: bash
+      run: >-
+        wp config create \
+          --path=${{ inputs.installation_path }} \
+          --dbname=wordpress \
+          --dbuser=root \
+          --dbpass=root
+
+    - name: Install WordPress
+      shell: bash
+      id: install
+      run: |-
+        ADMIN_PASSWORD="$( \
+          wp core install \
+            --path=${{ inputs.installation_path }} \
+            --url=localhost \
+            --title=WordPress \
+            --admin_user=admin \
+            --admin_email='${{ github.actor }}@github.com' \
+            --skip-email \
+            | sed 's/.*\(http.*\)/\1/' \
+        )"
+        echo "::add-mask::$ADMIN_PASSWORD"
+        cat <<EOF >> "$GITHUB_OUTPUT"
+        admin_username=admin
+        admin_password=$ADMIN_PASSWORD
+        EOF
+
+    - name: Get metadata
+      id: metadata
+      shell: bash
+      run: |-
+        cat <<EOF >> "$GITHUB_OUTPUT"
+        version=$($WP_CLI core version)
+        plugins_path=$($WP_CLI plugin path)
+        themes_path=$($WP_CLI theme path)
+        EOF
+      env:
+        WP_CLI: wp --path=${{ inputs.installation_path }}
