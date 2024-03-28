@@ -5,10 +5,10 @@ inputs:
     description: WordPress version
     required: false
     default: latest
-  #mysql-version:
-  #  description: 'MySQL version'
-  #  required: false
-  #  default: '5.7'
+  # mysql-version:
+  #   description: 'MySQL version'
+  #   required: false
+  #   default: '5.7'
   php_version:
     description: PHP version
     required: false
