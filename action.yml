@@ -5,10 +5,10 @@ inputs:
     description: WordPress version
     required: false
     default: latest
-  #mysql-version:
-  #  description: 'MySQL version'
-  #  required: false
-  #  default: '5.7'
+  # mysql-version:
+  #   description: 'MySQL version'
+  #   required: false
+  #   default: '5.7'
   php_version:
     description: PHP version
     required: false
@@ -76,6 +76,7 @@ runs:
     - name: Setup WP-CLI
       id: wp_cli
       shell: bash
+      # yamllint disable-line rule:line-length
       run: >- # https://make.wordpress.org/cli/handbook/guides/installing/#installing-via-composer
         composer global require wp-cli/wp-cli-bundle \
           --prefer-dist \
