@@ -1,0 +1,20 @@
+{
+  "owner": "holyhope",
+  "repo": "install-wordpress-github-action",
+  "title_prefix": "GitHub Action: ",
+  "paths": {
+    "action": "action.yml",
+    "readme": "README.md"
+  },
+  "show_logo": true,
+  "branding_svg_path": "doc/assets/branding.svg",
+  "branding_as_title_prefix": true,
+  "versioning": {
+    "enabled": false,
+    "badges": true,
+    "prefix": "v",
+    "override": "",
+    "branch": "main"
+  },
+  "pretty": true
+}

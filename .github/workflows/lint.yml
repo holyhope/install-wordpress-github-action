@@ -22,3 +22,12 @@ jobs:
                 present: false
               truthy:
                 check-keys: false
+
+  readme-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+      - run: npx --yes github-action-readme-generator@v1.7.2
+      - run: git diff --exit-code

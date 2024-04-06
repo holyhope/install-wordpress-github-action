@@ -1,5 +1,9 @@
 name: install-wordpress
-description: Install WordPress locally using GitHub
+description: Install WordPress locally using WP-CLI.
+author: holyhope
+branding:
+  icon: download-cloud
+  color: blue
 inputs:
   wordpress_version:
     description: WordPress version
