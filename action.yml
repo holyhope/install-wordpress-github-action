@@ -82,6 +82,12 @@ outputs:
   db_host:
     description: WordPress database host
     value: localhost
+  wp_cli:
+    description: Path to WP-CLI binary
+    value: >-
+      ${{ inputs.wp_cli_path
+        && inputs.wp_cli_path
+        || steps.wp_cli.outputs.path }}
 runs:
   using: composite
   steps:

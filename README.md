@@ -111,5 +111,6 @@ This action installs a [WordPress](https://developer.wordpress.org) instance tha
 | <b><code>db_user</code></b>        | WordPress database user        |
 | <b><code>db_pass</code></b>        | WordPress database password    |
 | <b><code>db_host</code></b>        | WordPress database host        |
+| <b><code>wp_cli</code></b>         | Path to WP-CLI binary          |
 
 <!-- end outputs -->
