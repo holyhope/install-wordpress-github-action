@@ -35,10 +35,21 @@ This action installs a [WordPress](https://developer.wordpress.org) instance tha
 ```yaml
 - uses: holyhope/install-wordpress-github-action@main
   with:
-    # Description: WordPress version
+    # Description: Select which version you want to download. Accepts a version
+    # number, 'latest' or 'nightly'.
     #
     # Default: latest
     wordpress_version: ""
+
+    # Description: The title of the new site.
+    #
+    # Default: WordPress
+    wordpress_title: ""
+
+    # Description: The locale/language for the installation (e.g. `de_DE`).
+    #
+    # Default: en_US
+    wordpress_locale: ""
 
     # Description: PHP version
     #
@@ -76,7 +87,9 @@ This action installs a [WordPress](https://developer.wordpress.org) instance tha
 
 | **<b>Input</b>**                      | **<b>Description</b>**                                                                                                                                                                                                        | **<b>Default</b>**                        | **<b>Required</b>** |
 | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- | ------------------- |
-| <b><code>wordpress_version</code></b> | WordPress version                                                                                                                                                                                                             | <code>latest</code>                       | **false**           |
+| <b><code>wordpress_version</code></b> | Select which version you want to download. Accepts a version number, 'latest' or 'nightly'.                                                                                                                                   | <code>latest</code>                       | **false**           |
+| <b><code>wordpress_title</code></b>   | The title of the new site.                                                                                                                                                                                                    | <code>WordPress</code>                    | **false**           |
+| <b><code>wordpress_locale</code></b>  | The locale/language for the installation (e.g. `de_DE`).                                                                                                                                                                      | <code>en_US</code>                        | **false**           |
 | <b><code>php_version</code></b>       | PHP version                                                                                                                                                                                                                   | <code>8.2</code>                          | **false**           |
 | <b><code>php_extensions</code></b>    | List of PHP extensions to install                                                                                                                                                                                             | <code>imagick</code>                      | **false**           |
 | <b><code>installation_path</code></b> | WordPress Installation path                                                                                                                                                                                                   | <code>${{ runner.temp }}/wordpress</code> | **false**           |
