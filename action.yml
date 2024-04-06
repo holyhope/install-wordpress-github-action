@@ -25,6 +25,15 @@ inputs:
     description: GitHub token
     required: true
     default: ${{ github.token }}
+  wp_cli_path:
+    description: >-
+      Path to the WP-CLI binary.
+
+      To use a custom version of WP-CLI, see the [`install-wp-cli`
+      GitHub action](https://github.com/marketplace/actions/install-wp-cli)
+
+      Default: Downloaded from the official WP-CLI website.
+    required: false
 outputs:
   version:
     description: WordPress version
@@ -73,26 +82,25 @@ runs:
         php-version: ${{ inputs.php_version }}
         extensions: ${{ inputs.php_extensions }}
 
-    - name: Setup WP-CLI
+    - uses: holyhope/install-wp-cli-github-action@v1.0.0
       id: wp_cli
-      shell: bash
-      # yamllint disable-line rule:line-length
-      run: >- # https://make.wordpress.org/cli/handbook/guides/installing/#installing-via-composer
-        composer global require wp-cli/wp-cli-bundle \
-          --prefer-dist \
-          --no-progress \
-          --no-suggest \
-          --no-interaction
+      if: ${{ ! inputs.wp_cli_path }}
 
     - name: Download WordPress
       shell: bash
       run: |-
-        wp core download --path=${{ inputs.installation_path }} --force
+        '${{ inputs.wp_cli_path
+          && inputs.wp_cli_path
+          || steps.wp_cli.outputs.path
+        }}' core download --path=${{ inputs.installation_path }} --force
 
     - name: Configure WordPress
       shell: bash
       run: >-
-        wp config create \
+        '${{ inputs.wp_cli_path
+          && inputs.wp_cli_path
+          || steps.wp_cli.outputs.path
+        }}' config create \
           --path=${{ inputs.installation_path }} \
           --dbname=wordpress \
           --dbuser=root \
@@ -103,7 +111,10 @@ runs:
       id: install
       run: |-
         ADMIN_PASSWORD="$( \
-          wp core install \
+          '${{ inputs.wp_cli_path
+          && inputs.wp_cli_path
+          || steps.wp_cli.outputs.path
+        }}' core install \
             --path=${{ inputs.installation_path }} \
             --url=localhost \
             --title=WordPress \
@@ -123,9 +134,16 @@ runs:
       shell: bash
       run: |-
         cat <<EOF >> "$GITHUB_OUTPUT"
-        version=$($WP_CLI core version)
-        plugins_path=$($WP_CLI plugin path)
-        themes_path=$($WP_CLI theme path)
+        version=$('${{ inputs.wp_cli_path
+            && inputs.wp_cli_path
+            || steps.wp_cli.outputs.path
+          }}' --path=${{ inputs.installation_path }} core version)
+        plugins_path=$('${{ inputs.wp_cli_path
+            && inputs.wp_cli_path
+            || steps.wp_cli.outputs.path
+          }}' --path=${{ inputs.installation_path }} plugin path)
+        themes_path=$('${{ inputs.wp_cli_path
+            && inputs.wp_cli_path
+            || steps.wp_cli.outputs.path
+          }}' --path=${{ inputs.installation_path }} theme path)
         EOF
-      env:
-        WP_CLI: wp --path=${{ inputs.installation_path }}
