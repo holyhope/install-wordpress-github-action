@@ -72,16 +72,19 @@ outputs:
     value: ${{ steps.install.outputs.admin_password }}
   db_name:
     description: WordPress database name
-    value: wordpress
+    value: ${{ steps.db.outputs.name }}
   db_user:
     description: WordPress database user
-    value: root
+    value: ${{ steps.db.outputs.user }}
   db_pass:
     description: WordPress database password
-    value: root
+    value: ${{ steps.db.outputs.pass }}
   db_host:
     description: WordPress database host
-    value: localhost
+    value: ${{ steps.db.outputs.host }}
+  db_port:
+    description: WordPress database port
+    value: ${{ steps.db.outputs.port }}
   wp_cli:
     description: Path to WP-CLI binary
     value: >-
@@ -97,7 +100,39 @@ runs:
 
     - name: Create the Database
       shell: bash
-      run: mysql -e 'CREATE DATABASE wordpress;' -uroot -proot
+      id: db
+      run: |-
+        PASSWORD="$(openssl rand -base64 12)"
+        USER='wordpress'
+        HOST='localhost'
+        DATABASE_NAME='wordpress'
+
+        echo "::add-mask::$PASSWORD"
+
+        echo '::group::Creating database...'
+
+        echo "Creating database '$DATABASE_NAME'"
+        mysql --user=root --password=root \
+          --execute="CREATE DATABASE $DATABASE_NAME;"
+
+        echo "Creating user '$USER' with password '$PASSWORD'"
+        mysql --user=root --password=root \
+          --execute="CREATE USER $USER@$HOST
+            IDENTIFIED WITH mysql_native_password BY '$PASSWORD';"
+
+        echo "Granting all privileges on '$DATABASE_NAME' to '$USER'"
+        mysql --user=root --password=root \
+          --execute="GRANT ALL PRIVILEGES ON $DATABASE_NAME.* TO $USER@$HOST;"
+
+        echo '::endgroup::'
+
+        cat <<EOF >> "$GITHUB_OUTPUT"
+        name=$DATABASE_NAME
+        user=$USER
+        pass=$PASSWORD
+        host=$HOST
+        port=3306
+        EOF
 
     - name: Prepare PHP extensions
       shell: bash
