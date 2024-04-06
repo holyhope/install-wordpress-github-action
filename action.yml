@@ -102,10 +102,12 @@ runs:
       shell: bash
       id: db
       run: |-
-        PASSWORD="$(openssl rand -base64 12)"
         USER='wordpress'
         HOST='localhost'
         DATABASE_NAME='wordpress'
+        # Generate a random password
+        # Use hex to avoid special characters
+        PASSWORD="$(openssl rand -hex 12)"
 
         echo "::add-mask::$PASSWORD"
 
