@@ -6,9 +6,19 @@ branding:
   color: blue
 inputs:
   wordpress_version:
-    description: WordPress version
+    description: >-
+      Select which version you want to download.
+      Accepts a version number, 'latest' or 'nightly'.
     required: false
     default: latest
+  wordpress_title:
+    description: The title of the new site.
+    required: false
+    default: WordPress
+  wordpress_locale:
+    description: The locale/language for the installation (e.g. `de_DE`).
+    required: false
+    default: en_US
   # mysql-version:
   #   description: 'MySQL version'
   #   required: false
@@ -18,9 +28,12 @@ inputs:
     required: false
     default: '8.2'
   php_extensions:
-    description: List of PHP extensions to install
+    description: |-
+      PHP extensions to install.
+      Each extension should be on a new line.
     required: false
-    default: imagick
+    default: |-
+      imagick
   installation_path:
     description: WordPress Installation path
     required: false
@@ -80,11 +93,21 @@ runs:
       shell: bash
       run: mysql -e 'CREATE DATABASE wordpress;' -uroot -proot
 
+    - name: Prepare PHP extensions
+      shell: bash
+      id: php_extensions
+      run: |
+        echo -n 'list=' >> "$GITHUB_OUTPUT"
+        echo '${{ inputs.php_extensions }}' | tr '\n' ',' >> "$GITHUB_OUTPUT"
+
     - name: Setup PHP with PECL extension
       uses: shivammathur/setup-php@v2
       with:
         php-version: ${{ inputs.php_version }}
-        extensions: ${{ inputs.php_extensions }}
+        extensions: ${{ steps.php_extensions.outputs.list }}
+      env:
+        fail-fast: true
+        GITHUB_TOKEN: ${{ inputs.github_token }}
 
     - uses: holyhope/install-wp-cli-github-action@v1.0.0
       id: wp_cli
@@ -96,7 +119,10 @@ runs:
         '${{ inputs.wp_cli_path
           && inputs.wp_cli_path
           || steps.wp_cli.outputs.path
-        }}' core download --path=${{ inputs.installation_path }} --force
+        }}' core download \
+          --path='${{ inputs.installation_path }}' \
+          --version='${{ inputs.wordpress_version }}' \
+          --skip-content
 
     - name: Configure WordPress
       shell: bash
@@ -122,14 +148,16 @@ runs:
             --path=${{ inputs.installation_path }} \
             --url=localhost \
             --title=WordPress \
-            --admin_user=admin \
+            --admin_user='${{ github.actor }}' \
             --admin_email='${{ github.actor }}@github.com' \
             --skip-email \
+            --locale='${{ inputs.wordpress_locale }}' \
             | sed 's/.*\(http.*\)/\1/' \
         )"
+
         echo "::add-mask::$ADMIN_PASSWORD"
         cat <<EOF >> "$GITHUB_OUTPUT"
-        admin_username=admin
+        admin_username=${{ github.actor }}
         admin_password=$ADMIN_PASSWORD
         EOF
 
