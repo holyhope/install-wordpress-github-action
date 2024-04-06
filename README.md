@@ -1,7 +1,3 @@
-# install-wp-cli-github-action
-
-Install wp-cli in your GitHub workflow
-
 <!-- How to generate this file
 ```shell
 npx --yes github-action-readme-generator@v1.7.2
@@ -10,7 +6,7 @@ npx --yes github-action-readme-generator@v1.7.2
 <div align="center" width="100%">
 <!-- start title -->
 
-# <img src="doc/assets/branding.svg" width="60px" align="center" alt="branding<icon:download-cloud color:blue>" /> GitHub Action: install-wordpress
+# <img src="doc/assets/branding.svg" width="60px" align="center" alt="branding<icon:download-cloud color:blue>" /> GitHub Action: Install WordPress
 
 <!-- end title -->
 <!-- start badges -->

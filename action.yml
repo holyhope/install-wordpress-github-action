@@ -1,4 +1,4 @@
-name: install-wordpress
+name: Install WordPress
 description: Install WordPress locally using WP-CLI.
 author: holyhope
 branding:
