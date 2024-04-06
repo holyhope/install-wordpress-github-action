@@ -28,9 +28,12 @@ inputs:
     required: false
     default: '8.2'
   php_extensions:
-    description: List of PHP extensions to install
+    description: |-
+      PHP extensions to install.
+      Each extension should be on a new line.
     required: false
-    default: imagick
+    default: |-
+      imagick
   installation_path:
     description: WordPress Installation path
     required: false
@@ -90,11 +93,21 @@ runs:
       shell: bash
       run: mysql -e 'CREATE DATABASE wordpress;' -uroot -proot
 
+    - name: Prepare PHP extensions
+      shell: bash
+      id: php_extensions
+      run: |
+        echo -n 'list=' >> "$GITHUB_OUTPUT"
+        echo '${{ inputs.php_extensions }}' | tr '\n' ',' >> "$GITHUB_OUTPUT"
+
     - name: Setup PHP with PECL extension
       uses: shivammathur/setup-php@v2
       with:
         php-version: ${{ inputs.php_version }}
-        extensions: ${{ inputs.php_extensions }}
+        extensions: ${{ steps.php_extensions.outputs.list }}
+      env:
+        fail-fast: true
+        GITHUB_TOKEN: ${{ inputs.github_token }}
 
     - uses: holyhope/install-wp-cli-github-action@v1.0.0
       id: wp_cli

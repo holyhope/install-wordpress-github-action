@@ -56,7 +56,7 @@ This action installs a [WordPress](https://developer.wordpress.org) instance tha
     # Default: 8.2
     php_version: ""
 
-    # Description: List of PHP extensions to install
+    # Description: PHP extensions to install. Each extension should be on a new line.
     #
     # Default: imagick
     php_extensions: ""
@@ -91,7 +91,7 @@ This action installs a [WordPress](https://developer.wordpress.org) instance tha
 | <b><code>wordpress_title</code></b>   | The title of the new site.                                                                                                                                                                                                    | <code>WordPress</code>                    | **false**           |
 | <b><code>wordpress_locale</code></b>  | The locale/language for the installation (e.g. `de_DE`).                                                                                                                                                                      | <code>en_US</code>                        | **false**           |
 | <b><code>php_version</code></b>       | PHP version                                                                                                                                                                                                                   | <code>8.2</code>                          | **false**           |
-| <b><code>php_extensions</code></b>    | List of PHP extensions to install                                                                                                                                                                                             | <code>imagick</code>                      | **false**           |
+| <b><code>php_extensions</code></b>    | PHP extensions to install.<br />Each extension should be on a new line.                                                                                                                                                       | <code>imagick</code>                      | **false**           |
 | <b><code>installation_path</code></b> | WordPress Installation path                                                                                                                                                                                                   | <code>${{ runner.temp }}/wordpress</code> | **false**           |
 | <b><code>github_token</code></b>      | GitHub token                                                                                                                                                                                                                  | <code>${{ github.token }}</code>          | **true**            |
 | <b><code>wp_cli_path</code></b>       | Path to the WP-CLI binary.<br />To use a custom version of WP-CLI, see the [`install-wp-cli` GitHub action](https://github.com/marketplace/actions/install-wp-cli)<br />Default: Downloaded from the official WP-CLI website. |                                           | **false**           |
