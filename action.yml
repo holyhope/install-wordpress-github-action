@@ -152,7 +152,8 @@ runs:
             --admin_email='${{ github.actor }}@github.com' \
             --skip-email \
             --locale='${{ inputs.wordpress_locale }}' \
-            | sed 's/.*\(http.*\)/\1/' \
+            | grep 'Admin password: ' \
+            | sed 's/Admin password: //' \
         )"
 
         echo "::add-mask::$ADMIN_PASSWORD"
