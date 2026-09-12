@@ -19,6 +19,13 @@ inputs:
     description: The locale/language for the installation (e.g. `de_DE`).
     required: false
     default: en_US
+  admin_email:
+    description: >-
+      Email address for the WordPress admin account.
+
+      When not set, it is derived from the actor running the workflow
+      (`github.actor`), sanitized to always be a valid email address.
+    required: false
   # mysql-version:
   #   description: 'MySQL version'
   #   required: false
@@ -67,6 +74,9 @@ outputs:
   admin_username:
     description: WordPress admin username
     value: ${{ steps.install.outputs.admin_username }}
+  admin_email:
+    description: WordPress admin email
+    value: ${{ steps.install.outputs.admin_email }}
   admin_password:
     description: WordPress admin password
     value: ${{ steps.install.outputs.admin_password }}
@@ -182,7 +192,25 @@ runs:
     - name: Install WordPress
       shell: bash
       id: install
+      env:
+        ACTOR: ${{ github.actor }}
+        ADMIN_EMAIL_INPUT: ${{ inputs.admin_email }}
       run: |-
+        # Use the caller-supplied admin_email verbatim when set. Otherwise,
+        # derive one from the actor login, sanitized to a conservative
+        # always-valid local part (WordPress's is_email() rejects
+        # characters such as '[' and ']', which appear in every GitHub
+        # App/bot actor login, e.g. "datadog-official[bot]").
+        if [ -n "$ADMIN_EMAIL_INPUT" ]; then
+          ADMIN_EMAIL="$ADMIN_EMAIL_INPUT"
+        else
+          SANITIZED_ACTOR="$(printf '%s' "$ACTOR" | tr -dc 'A-Za-z0-9._+-')"
+          if [ -z "$SANITIZED_ACTOR" ]; then
+            SANITIZED_ACTOR=github-actions
+          fi
+          ADMIN_EMAIL="${SANITIZED_ACTOR}@github.com"
+        fi
+
         ADMIN_PASSWORD="$( \
           '${{ inputs.wp_cli_path
           && inputs.wp_cli_path
@@ -191,8 +219,8 @@ runs:
             --path=${{ inputs.installation_path }} \
             --url=localhost \
             --title=WordPress \
-            --admin_user='${{ github.actor }}' \
-            --admin_email='${{ github.actor }}@github.com' \
+            --admin_user="$ACTOR" \
+            --admin_email="$ADMIN_EMAIL" \
             --skip-email \
             --locale='${{ inputs.wordpress_locale }}' \
             | grep 'Admin password: ' \
@@ -201,7 +229,8 @@ runs:
 
         echo "::add-mask::$ADMIN_PASSWORD"
         cat <<EOF >> "$GITHUB_OUTPUT"
-        admin_username=${{ github.actor }}
+        admin_username=$ACTOR
+        admin_email=$ADMIN_EMAIL
         admin_password=$ADMIN_PASSWORD
         EOF
 
